@@ -117,7 +117,7 @@ func (b *Board) hasEdge(idx Index, side int) bool {
 func (b *Board) nextNeighbor(idx Index, side int) (adj Index, newSide int, hasErr bool) {
 	if numEdges(*b.get(idx)) != 2 && numEdges(*b.get(idx)) != 3 {
 		fmt.Println("had less than 2 edges")
-		return Index{0, 0}, 0, true
+		return idx, side, true
 	}
 	for i := 1; i <= 8; i <<= 1 {
 		if side != i && !b.hasEdge(idx, i) {
@@ -132,7 +132,7 @@ func (b *Board) nextNeighbor(idx Index, side int) (adj Index, newSide int, hasEr
 	}
 	//If we get here then there wasn't a neighbor on the board
 	fmt.Println("got to end")
-	return Index{0, 0}, 0, true
+	return idx, side, true
 }
 
 func (b *Board) stringLength(start Index) (count int, isLoop bool) {
@@ -158,16 +158,23 @@ func (b *Board) stringLength(start Index) (count int, isLoop bool) {
 	}
 	startNeighbor = oppSide(endNeighbor)
 	for end != start && !hasErr {
+		fmt.Println("places", end, start)
 		addToCount(end)
 		end, endNeighbor, hasErr = b.nextNeighbor(end, endNeighbor)
 	}
 	hasErr = false
-	for end != start && !hasErr {
+	if(start == end) {
+		isLoop = true
+		return
+	}
+	start, startNeighbor, hasErr = b.nextNeighbor(start,startNeighbor)
+	for !hasErr {
+		fmt.Println("places", end, start)
 		addToCount(start)
 		start, startNeighbor, hasErr = b.nextNeighbor(start, startNeighbor)
 	}
 	if(end == start) {
-		fmt.Println(start, end)
+		fmt.Println("places", start, end)
 		isLoop = true
 	}
 	return
@@ -215,16 +222,20 @@ func (b *Board) print() {
 func main() {
 	b := MakeBoard(4, 4)
 	fmt.Println(b.board)
-	b.move(Index{0, 0}, 4)
+	b.move(Index{0, 0}, 8)
 	fmt.Println(b.board)
 	b.move(Index{0, 0}, 1)
 	b.move(Index{0, 1}, 1)
 	b.move(Index{0, 1}, 2)
-	b.move(Index{1, 1}, 2)
-	b.move(Index{1, 1}, 4)
-	b.move(Index{1, 0}, 4)
-	b.move(Index{1, 0}, 8)
-	//b.move(Index{0,1},2)
+	b.move(Index{1,1}, 2)
+
+	b.move(Index{1,0}, 2)
+	b.move(Index{1,0}, 8)
+	b.move(Index{2, 1}, 2)
+	b.move(Index{2, 1}, 4)
+	b.move(Index{2, 0}, 4)
+	b.move(Index{2, 0}, 8)
+	b.move(Index{0,1},2)
 	fmt.Println(b.board)
 	fmt.Println(b.stringLength(Index{0, 1}))
 	b.print()

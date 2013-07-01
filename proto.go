@@ -19,43 +19,31 @@ func MakeBoard(rows int, cols int) Board {
 	return Board{0, 0, rows, cols, arr}
 }
 
+func (b *Board) onBoard(idx Index) bool {
+	return (0 <= idx.row && idx.row < b.rows && 0 <= idx.col && idx.col < b.cols)
+}
+
 func (b *Board) get(idx Index) *int {
 	return &b.board[idx.row][idx.col]
 }
 
-func (b *Board) getNorth(idx Index) (Index, bool) {
-	if idx.row > 0 {
-		return Index{idx.row - 1, idx.col}, false
-	} else {
-		return Index{0, 0}, true
-	}
+func (b *Board) getNorth(idx Index) Index {
+	return Index{idx.row - 1, idx.col} 	
 }
 
-func (b *Board) getSouth(idx Index) (Index, bool) {
-	if idx.row < b.rows-1 {
-		return Index{idx.row + 1, idx.col}, false
-	} else {
-		return Index{0, 0}, true
-	}
+func (b *Board) getSouth(idx Index) Index {
+	return Index{idx.row + 1, idx.col} 	
 }
 
-func (b *Board) getWest(idx Index) (Index, bool) {
-	if idx.col > 0 {
-		return Index{idx.row, idx.col - 1}, false
-	} else {
-		return Index{0, 0}, true
-	}
+func (b *Board) getWest(idx Index) Index {
+	return Index{idx.row, idx.col - 1}
 }
 
-func (b *Board) getEast(idx Index) (Index, bool) {
-	if idx.col < b.cols-1 {
-		return Index{idx.row, idx.col + 1}, false
-	} else {
-		return Index{0, 0}, true
-	}
+func (b *Board) getEast(idx Index) Index {
+	return Index{idx.row, idx.col + 1}
 }
 
-func (b *Board) getNeighbor(idx Index, side int) (Index, bool) {
+func (b *Board) getNeighbor(idx Index, side int) Index {
 	switch side {
 	case 1:
 		return b.getNorth(idx)
@@ -66,17 +54,15 @@ func (b *Board) getNeighbor(idx Index, side int) (Index, bool) {
 	case 8:
 		return b.getWest(idx)
 	default:
-		return Index{0, 0}, true
+		return Index{-1, -1}
 	}
 }
 
 func (b *Board) move(idx Index, side int) {
 	*b.get(idx) |= side
-	var adjacent Index
-	var noNeighbor bool
 	oppositeSide := oppSide(side)
-	adjacent, noNeighbor = b.getNeighbor(idx, side)
-	if !noNeighbor {
+	adjacent := b.getNeighbor(idx, side)
+	if b.onBoard(adjacent) {
 		*b.get(adjacent) |= oppositeSide
 	}
 	if *b.get(idx) == 15 {
@@ -122,12 +108,10 @@ func (b *Board) nextNeighbor(idx Index, side int) (adj Index, newSide int, hasEr
 	for i := 1; i <= 8; i <<= 1 {
 		if side != i && !b.hasEdge(idx, i) {
 			fmt.Println("idx", idx, "Side", side, "i", i)
-			adj, hasErr = b.getNeighbor(idx, i)
+			adj = b.getNeighbor(idx, i)
 			newSide = oppSide(i)
 			fmt.Println(adj, hasErr, newSide)
-			if !hasErr {
-				return
-			}
+			return
 		}
 	}
 	//If we get here then there wasn't a neighbor on the board
@@ -137,7 +121,7 @@ func (b *Board) nextNeighbor(idx Index, side int) (adj Index, newSide int, hasEr
 
 func (b *Board) stringLength(start Index) (count int, isLoop bool) {
 	count = 0
-	isLoop = false
+	isLoop = true
 	addToCount := func(idx Index) {
 		if numEdges(*b.get(idx)) == 2 || numEdges(*b.get(idx)) == 3 {
 			fmt.Println("in Count", idx)
@@ -157,25 +141,23 @@ func (b *Board) stringLength(start Index) (count int, isLoop bool) {
 		return
 	}
 	startNeighbor = oppSide(endNeighbor)
-	for end != start && !hasErr {
+	for end != start && !hasErr && b.onBoard(end) {
 		fmt.Println("places", end, start)
 		addToCount(end)
 		end, endNeighbor, hasErr = b.nextNeighbor(end, endNeighbor)
 	}
 	hasErr = false
-	if(start == end) {
-		isLoop = true
+	if start == end {
 		return
 	}
 	start, startNeighbor, hasErr = b.nextNeighbor(start,startNeighbor)
-	for !hasErr {
+	for !hasErr && b.onBoard(start) {
 		fmt.Println("places", end, start)
 		addToCount(start)
 		start, startNeighbor, hasErr = b.nextNeighbor(start, startNeighbor)
 	}
-	if(end == start) {
-		fmt.Println("places", start, end)
-		isLoop = true
+	if !b.onBoard(end) || !b.onBoard(start) {
+		isLoop = false
 	}
 	return
 }
@@ -236,8 +218,10 @@ func main() {
 	b.move(Index{2, 0}, 4)
 	b.move(Index{2, 0}, 8)
 	b.move(Index{0,1},2)
+	b.move(Index{0,1},4)
 	fmt.Println(b.board)
 	fmt.Println(b.stringLength(Index{0, 1}))
 	b.print()
+	fmt.Println(b.onBoard(Index{-1,-1}))
 
 }

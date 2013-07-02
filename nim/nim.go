@@ -29,7 +29,7 @@ func (ns *NimState) AvailableMoves() []string {
 	if currentMax > ns.remaining {
 		currentMax = ns.remaining
 	}
-	moves := make([]string, maxMove-1)
+	moves := make([]string, currentMax)
 	for i, _ := range moves {
 		moves[i] = fmt.Sprintf("%d", i+1)
 	}
@@ -50,6 +50,7 @@ func (ns *NimState) RandomPlayout() bool {
 	for ns.remaining > 0 {
 		moves = ns.AvailableMoves()
 		move = moves[rand.Intn(len(moves))]
+		fmt.Println(move, ns.currentPlayer)
 		ns.MakeMove(move)
 	}
 	//Note to self, to win player != current Player

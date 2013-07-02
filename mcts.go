@@ -19,13 +19,14 @@ type node struct {
 	children []node //I hope these don't need to be pointers
 	parent *node
 	isLeaf bool
+	isTerminal bool
 	move string //The move that was made to get to this position from the parent
 }
 
 type state interface {
 	Clone(state) // copies all the values from the argument to the callee, to make a copy without allocation
-	ListAvaliableMoves() []string //List the legal moves from the current state in string format
-	MakeMove(string) //Make a move given a string (of the same format that ListAvaliableMoves outputs)
+	AvailableMoves() []string //List the legal moves from the current state in string format
+	MakeMove(string) //Make a move given a string (of the same format that AvailableMoves outputs)
 
 	//Make a random playout from the current state and return whether the first player to move won 
 	//(counting from the beginning of the random playout)
@@ -53,9 +54,13 @@ func (n *node) averageScore() float64 {
 
 func (n *node) expand(s state) {
 	n.isLeaf = false
-	moves := s.ListAvaliableMoves()
+	moves := s.AvailableMoves()
 	l := len(moves)
-	n.childdren := make([]node, l)
+	if len(moves) == 0 {
+		//Works on the assumption that a lack of remaining moves signifies an ended game
+		n.isTerminal = true
+	}
+	n.children := make([]node, l)
 	for i, child := range n.children {
 		child.move = moves[i]
 		child.isLeaf = true
@@ -66,7 +71,7 @@ func (n *node) expand(s state) {
 func (n *node) treePolicy(s state) *node{
 	//S is a state consistant with node n
 	ret := n
-	for !ret.isLeaf {
+	for !ret.isLeaf && !ret.isTerminal {
 		ret.visits ++
 		ret = ret.selectChild()
 		s.MakeMove(ret.move)

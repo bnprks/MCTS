@@ -1,4 +1,4 @@
-package main
+package dots
 
 import "fmt"
 
@@ -28,11 +28,11 @@ func (b *Board) get(idx Index) *int {
 }
 
 func (b *Board) getNorth(idx Index) Index {
-	return Index{idx.row - 1, idx.col} 	
+	return Index{idx.row - 1, idx.col}
 }
 
 func (b *Board) getSouth(idx Index) Index {
-	return Index{idx.row + 1, idx.col} 	
+	return Index{idx.row + 1, idx.col}
 }
 
 func (b *Board) getWest(idx Index) Index {
@@ -150,7 +150,7 @@ func (b *Board) stringLength(start Index) (count int, isLoop bool) {
 	if start == end {
 		return
 	}
-	start, startNeighbor, hasErr = b.nextNeighbor(start,startNeighbor)
+	start, startNeighbor, hasErr = b.nextNeighbor(start, startNeighbor)
 	for !hasErr && b.onBoard(start) {
 		fmt.Println("places", end, start)
 		addToCount(start)
@@ -201,7 +201,7 @@ func (b *Board) print() {
 	fmt.Println(out)
 }
 
-func main() {
+func main2() {
 	b := MakeBoard(4, 4)
 	fmt.Println(b.board)
 	b.move(Index{0, 0}, 8)
@@ -209,19 +209,19 @@ func main() {
 	b.move(Index{0, 0}, 1)
 	b.move(Index{0, 1}, 1)
 	b.move(Index{0, 1}, 2)
-	b.move(Index{1,1}, 2)
+	b.move(Index{1, 1}, 2)
 
-	b.move(Index{1,0}, 2)
-	b.move(Index{1,0}, 8)
+	b.move(Index{1, 0}, 2)
+	b.move(Index{1, 0}, 8)
 	b.move(Index{2, 1}, 2)
 	b.move(Index{2, 1}, 4)
 	b.move(Index{2, 0}, 4)
 	b.move(Index{2, 0}, 8)
-	b.move(Index{0,1},2)
-	b.move(Index{0,1},4)
+	b.move(Index{0, 1}, 2)
+	b.move(Index{0, 1}, 4)
 	fmt.Println(b.board)
 	fmt.Println(b.stringLength(Index{0, 1}))
 	b.print()
-	fmt.Println(b.onBoard(Index{-1,-1}))
+	fmt.Println(b.onBoard(Index{-1, -1}))
 
 }

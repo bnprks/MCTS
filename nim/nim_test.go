@@ -78,3 +78,20 @@ func TestTerminalPlayout(t *testing.T) {
 		t.Error("RandomPlayout returned wrong winner")
 	}
 }
+
+func BenchmarkClonedPlayoutsPointers(b *testing.B) {
+	ns := NimState{10, 0}
+	p := &ns
+	var cpy *NimState
+	b.ResetTimer()
+	cpy.Clone(ns)
+	cpy.RandomPlayout()
+}
+
+func BenchmarkClonedPlayoutsValues(b *testing.B) {
+	ns := NimState{10,0}
+	var cpy NimState
+	b.ResetTimer()
+	cpy = ns.Clone()
+	cpy.RandomPlayout()
+}
